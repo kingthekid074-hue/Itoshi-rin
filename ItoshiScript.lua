@@ -151,7 +151,7 @@ local function CreateButton(text, callback)
     end)
 end
 
-CreateButton("Auto Gems (Fast)", function(state)
+CreateButton("Auto Gems (Fix)", function(state)
     getgenv().AutoGems = state
 end)
 
@@ -175,16 +175,21 @@ task.spawn(function()
     while task.wait() do
         if getgenv().AutoGems then
             pcall(function()
-                local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
+                local hoopsFolder = game.Workspace:FindFirstChild("Hoops")
+                local items = hoopsFolder and hoopsFolder:GetChildren() or game.Workspace:GetChildren()
+                
                 local char = Player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
+                
                 if root then
-                    for _, v in pairs(container:GetChildren()) do
+                    for _, v in pairs(items) do
                         if not getgenv().AutoGems then break end
+                        
                         if v.Name == "Gem" and v:FindFirstChild("outerGem") then
-                            if v.outerGem.Transparency < 1 then
-                                root.CFrame = v.outerGem.CFrame
-                                task.wait(0.1)
+                            local part = v.outerGem
+                            if part:FindFirstChild("TouchInterest") then
+                                root.CFrame = part.CFrame
+                                task.wait()
                             end
                         end
                     end
@@ -198,16 +203,19 @@ task.spawn(function()
     while task.wait() do
         if getgenv().AutoHoops then
             pcall(function()
-                local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
+                local hoopsFolder = game.Workspace:FindFirstChild("Hoops")
+                local items = hoopsFolder and hoopsFolder:GetChildren() or game.Workspace:GetChildren()
                 local char = Player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
+                
                 if root then
-                    for _, v in pairs(container:GetChildren()) do
+                    for _, v in pairs(items) do
                         if not getgenv().AutoHoops then break end
+                        
                         if string.find(v.Name, "Hoop") then
-                             if v.Transparency < 1 then
+                            if v:FindFirstChild("TouchInterest") then
                                 root.CFrame = v.CFrame
-                                task.wait() 
+                                task.wait()
                             end
                         end
                     end
@@ -220,7 +228,9 @@ end)
 RunService.Stepped:Connect(function()
     if getgenv().SuperSpeed then
         pcall(function()
-            Player.Character.Humanoid.WalkSpeed = 300
+            if Player.Character and Player.Character:FindFirstChild("Humanoid") then
+                Player.Character.Humanoid.WalkSpeed = 300
+            end
         end)
     end
 end)
