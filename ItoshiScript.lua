@@ -2,38 +2,22 @@ if getgenv().ItoshiGuiLoaded then return end
 getgenv().ItoshiGuiLoaded = true
 
 local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
--- تفعيل NoClip (عشان ما تعلق في الجواهر)
-task.spawn(function()
-    while true do
-        if getgenv().AutoGems or getgenv().AutoHoops then
-            pcall(function()
-                if Player.Character then
-                    for _, v in pairs(Player.Character:GetDescendants()) do
-                        if v:IsA("BasePart") and v.CanCollide == true then
-                            v.CanCollide = false
-                        end
-                    end
-                end
-            end)
-        end
-        task.wait(0.1)
-    end
-end)
-
 local Theme = {
     Main = Color3.fromRGB(20, 20, 25),
-    Accent = Color3.fromRGB(255, 50, 50), -- لون أحمر للطوارئ (Bypass Mode)
+    Accent = Color3.fromRGB(0, 255, 255),
     Button = Color3.fromRGB(40, 40, 45),
     Text = Color3.fromRGB(255, 255, 255),
     On = Color3.fromRGB(0, 255, 100)
 }
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ItoshiHub_Bypass"
+ScreenGui.Name = "ItoshiHub_FinalFix"
 pcall(function() ScreenGui.Parent = CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
@@ -60,10 +44,10 @@ MainStroke.Parent = MainFrame
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Text = "ITOSHI BYPASS ⚠️"
+Title.Text = "ITOSHI HUB (FIX) 💎"
 Title.TextColor3 = Theme.Accent
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 20
+Title.TextSize = 18
 Title.Parent = MainFrame
 
 local Container = Instance.new("ScrollingFrame")
@@ -107,13 +91,15 @@ local function CreateButton(text, callback)
         callback(enabled)
         if enabled then
             btn.BackgroundColor3 = Theme.Accent
+            BtnTitle.TextColor3 = Color3.new(0,0,0)
         else
             btn.BackgroundColor3 = Theme.Button
+            BtnTitle.TextColor3 = Theme.Text
         end
     end)
 end
 
-CreateButton("AUTO GEMS", function(state)
+CreateButton("AUTO GEMS (SHAKE FIX)", function(state)
     getgenv().AutoGems = state
 end)
 
@@ -133,46 +119,44 @@ CreateButton("Infinite Jump", function(state)
     getgenv().InfJump = state
 end)
 
--- --- THE NUCLEAR BYPASS LOGIC ---
-
+-- --- GEM FIX LOGIC ---
 task.spawn(function()
     while task.wait() do
         if getgenv().AutoGems then
             pcall(function()
-                local gems = {}
-                -- نجمع كل الجواهر من كل مكان
-                if game.Workspace:FindFirstChild("Hoops") then
-                    for _, v in pairs(game.Workspace.Hoops:GetChildren()) do
-                        if v.Name == "Gem" then table.insert(gems, v) end
-                    end
-                end
-                
+                local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
                 local char = Player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
                 
                 if root then
-                    for _, gem in pairs(gems) do
+                    for _, v in pairs(container:GetChildren()) do
                         if not getgenv().AutoGems then break end
                         
-                        -- نبحث عن أي جزء داخل الجوهرة ونلمسه
-                        local parts = gem:GetDescendants()
-                        for _, part in pairs(parts) do
-                            if part:IsA("BasePart") then
-                                -- 1. الانتقال للموقع
+                        -- شرط الجوهرة
+                        if v.Name == "Gem" and v:FindFirstChild("outerGem") then
+                            local part = v.outerGem
+                            if part.Transparency < 1 then -- تأكد أنها مرئية
+                                
+                                -- 1. الانتقال
                                 root.CFrame = part.CFrame
                                 
-                                -- 2. تصفير السرعة لمنع الارجاع
-                                root.Velocity = Vector3.new(0,0,0) 
+                                -- 2. الاهتزاز (Wiggle) لإجبار التلامس
+                                root.CFrame = root.CFrame * CFrame.new(0, 2, 0)
+                                task.wait(0.05)
+                                root.CFrame = root.CFrame * CFrame.new(0, -2, 0)
                                 
-                                -- 3. لمس إجباري (FireTouchInterest)
+                                -- 3. محاولة إرسال Remote Event يدوياً (Bypass)
+                                if ReplicatedStorage:FindFirstChild("rEvents") and ReplicatedStorage.rEvents:FindFirstChild("orbEvent") then
+                                     ReplicatedStorage.rEvents.orbEvent:FireServer("collect", "Gem")
+                                end
+
+                                -- 4. استخدام firetouchinterest اذا كان مدعوما
                                 if firetouchinterest then
                                     firetouchinterest(root, part, 0)
                                     firetouchinterest(root, part, 1)
                                 end
                                 
-                                -- انتظار بسيط جداً (بدونه السيرفر يرفض الطلب)
-                                task.wait()
-                                break -- ننتقل للجوهرة التالية فوراً
+                                task.wait(0.15) -- انتظار أطول قليلاً لضمان التسجيل
                             end
                         end
                     end
@@ -192,7 +176,6 @@ task.spawn(function()
                     if not getgenv().AutoHoops then break end
                     if string.find(v.Name, "Hoop") and v:IsA("BasePart") then
                         root.CFrame = v.CFrame
-                        root.Velocity = Vector3.new(0,0,0)
                         if firetouchinterest then
                             firetouchinterest(root, v, 0)
                             firetouchinterest(root, v, 1)
@@ -226,4 +209,4 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     if getgenv().InfJump and Player.Character then
         Player.Character.Humanoid:ChangeState("Jumping")
     end
-enFIX
+end)
