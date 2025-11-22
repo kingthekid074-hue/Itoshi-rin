@@ -7,7 +7,7 @@ local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "LegendSpeedHub"
+ScreenGui.Name = "ItoshiHub"
 pcall(function() ScreenGui.Parent = CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
@@ -23,8 +23,8 @@ MainFrame.Parent = ScreenGui
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(255, 85, 0)
-Title.Text = "⚡ Legends Hub ⚡"
+Title.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+Title.Text = "⚡ Itoshi Hub ⚡"
 Title.TextColor3 = Color3.new(1, 1, 1)
 Title.Font = Enum.Font.FredokaOne
 Title.TextSize = 18
