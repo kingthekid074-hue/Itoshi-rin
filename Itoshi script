@@ -1,0 +1,102 @@
+if getgenv().MyScriptLoaded then return end
+getgenv().MyScriptLoaded = true
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local Humanoid = Character:WaitForChild("Humanoid")
+
+LocalPlayer.CharacterAdded:Connect(function(newChar)
+    Character = newChar
+    Humanoid = newChar:WaitForChild("Humanoid")
+end)
+
+local function Main()
+    local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+    local Window = OrionLib:MakeWindow({
+        Name = "My Mobile Hub", 
+        HidePremium = false, 
+        SaveConfig = true, 
+        ConfigFolder = "MyScriptConfig"
+    })
+
+    local PlayerTab = Window:MakeTab({
+        Name = "Player",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })
+
+    PlayerTab:AddSlider({
+        Name = "WalkSpeed",
+        Min = 16,
+        Max = 500,
+        Default = 16,
+        Color = Color3.fromRGB(255,255,255),
+        Increment = 1,
+        ValueName = "Speed",
+        Callback = function(Value)
+            if Humanoid then Humanoid.WalkSpeed = Value end
+        end    
+    })
+
+    local FarmTab = Window:MakeTab({
+        Name = "Auto Farm",
+        Icon = "rbxassetid://4483345998",
+        PremiumOnly = false
+    })
+
+    FarmTab:AddToggle({
+        Name = "Enable Auto Farm",
+        Default = false,
+        Callback = function(Value)
+            getgenv().AutoFarm = Value
+        end    
+    })
+
+    OrionLib:Init()
+
+    task.spawn(function()
+        while task.wait() do
+            if getgenv().AutoFarm then
+                pcall(function()
+                    local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
+
+                    for _, item in pairs(container:GetChildren()) do
+                        if item.Name == "Gem" and item:FindFirstChild("outerGem") then
+                            local char = game.Players.LocalPlayer.Character
+                            if char and char:FindFirstChild("HumanoidRootPart") then
+                                char.HumanoidRootPart.CFrame = item.outerGem.CFrame
+                                task.wait() 
+                            end
+                        end
+                    end
+                end)
+            end
+        end
+    end)
+
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    setreadonly(mt, false)
+
+    mt.__namecall = newcclosure(function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+
+        if method == "FireServer" and self.Name == "TakeDamage" then
+            return nil 
+        end
+        
+        return oldNamecall(self, ...)
+    end)
+
+    setreadonly(mt, true)
+end
+
+local success, err = pcall(Main)
+if not success then
+    warn(err)
+end
