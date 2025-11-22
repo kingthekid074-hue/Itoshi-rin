@@ -1,108 +1,173 @@
-if getgenv().MyGuiLoaded then return end
-getgenv().MyGuiLoaded = true
+if getgenv().ItoshiGuiLoaded then return end
+getgenv().ItoshiGuiLoaded = true
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local Player = Players.LocalPlayer
 
+local Theme = {
+    Main = Color3.fromRGB(25, 25, 30),
+    Accent = Color3.fromRGB(0, 255, 200),
+    Button = Color3.fromRGB(40, 40, 45),
+    Text = Color3.fromRGB(255, 255, 255),
+    On = Color3.fromRGB(0, 255, 150),
+    Off = Color3.fromRGB(40, 40, 45)
+}
+
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ItoshiHub"
+ScreenGui.Name = "ItoshiHub_Premium"
 pcall(function() ScreenGui.Parent = CoreGui end)
 if not ScreenGui.Parent then ScreenGui.Parent = Player:WaitForChild("PlayerGui") end
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
-MainFrame.Size = UDim2.new(0, 200, 0, 250)
+MainFrame.Size = UDim2.new(0, 220, 0, 320)
 MainFrame.Position = UDim2.new(0.1, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+MainFrame.BackgroundColor3 = Theme.Main
 MainFrame.BorderSizePixel = 0
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
+local MainCorner = Instance.new("UICorner")
+MainCorner.CornerRadius = UDim.new(0, 10)
+MainCorner.Parent = MainFrame
+
+local MainStroke = Instance.new("UIStroke")
+MainStroke.Thickness = 2
+MainStroke.Color = Theme.Accent
+MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MainStroke.Parent = MainFrame
+
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 30)
-Title.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
-Title.Text = "⚡ Itoshi Hub ⚡"
-Title.TextColor3 = Color3.new(1, 1, 1)
-Title.Font = Enum.Font.FredokaOne
-Title.TextSize = 18
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.BackgroundTransparency = 1
+Title.Text = "ITOSHI HUB ⚡"
+Title.TextColor3 = Theme.Accent
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 20
 Title.Parent = MainFrame
+
+local Line = Instance.new("Frame")
+Line.Size = UDim2.new(0.8, 0, 0, 1)
+Line.Position = UDim2.new(0.1, 0, 0.13, 0)
+Line.BackgroundColor3 = Theme.Accent
+Line.BorderSizePixel = 0
+Line.Parent = MainFrame
 
 local MinBtn = Instance.new("TextButton")
 MinBtn.Size = UDim2.new(0, 30, 0, 30)
-MinBtn.Position = UDim2.new(1, -30, 0, 0)
-MinBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+MinBtn.Position = UDim2.new(0.85, 0, 0.02, 0)
+MinBtn.BackgroundTransparency = 1
 MinBtn.Text = "-"
-MinBtn.TextColor3 = Color3.new(1, 1, 1)
-MinBtn.TextSize = 20
+MinBtn.TextColor3 = Theme.Text
+MinBtn.Font = Enum.Font.GothamBold
+MinBtn.TextSize = 24
 MinBtn.Parent = MainFrame
 
-local ContentFrame = Instance.new("Frame")
-ContentFrame.Size = UDim2.new(1, 0, 1, -30)
-ContentFrame.Position = UDim2.new(0, 0, 0, 30)
-ContentFrame.BackgroundTransparency = 1
-ContentFrame.Parent = MainFrame
+local Container = Instance.new("ScrollingFrame")
+Container.Name = "Container"
+Container.Size = UDim2.new(1, -20, 0.82, 0)
+Container.Position = UDim2.new(0, 10, 0.16, 0)
+Container.BackgroundTransparency = 1
+Container.BorderSizePixel = 0
+Container.ScrollBarThickness = 2
+Container.ScrollBarImageColor3 = Theme.Accent
+Container.Parent = MainFrame
+
+local UIList = Instance.new("UIListLayout")
+UIList.Padding = UDim.new(0, 8)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.HorizontalAlignment = Enum.HorizontalAlignment.Center
+UIList.Parent = Container
 
 local IsMinimized = false
 MinBtn.MouseButton1Click:Connect(function()
     IsMinimized = not IsMinimized
-    ContentFrame.Visible = not IsMinimized
     if IsMinimized then
-        MainFrame.Size = UDim2.new(0, 200, 0, 30)
+        MainFrame:TweenSize(UDim2.new(0, 220, 0, 40), "Out", "Quad", 0.3, true)
+        Container.Visible = false
+        Line.Visible = false
         MinBtn.Text = "+"
     else
-        MainFrame.Size = UDim2.new(0, 200, 0, 250)
+        MainFrame:TweenSize(UDim2.new(0, 220, 0, 320), "Out", "Quad", 0.3, true)
+        task.wait(0.2)
+        Container.Visible = true
+        Line.Visible = true
         MinBtn.Text = "-"
     end
 end)
 
-local function CreateButton(text, order, callback)
+local function CreateButton(text, callback)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = UDim2.new(0.05, 0, 0, 10 + (order * 40))
-    btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    btn.Text = text
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.SourceSansBold
-    btn.TextSize = 16
-    btn.Parent = ContentFrame
+    btn.Size = UDim2.new(1, -10, 0, 40)
+    btn.BackgroundColor3 = Theme.Button
+    btn.Text = ""
+    btn.AutoButtonColor = false
+    btn.Parent = Container
+
+    local BtnCorner = Instance.new("UICorner")
+    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.Parent = btn
     
+    local BtnTitle = Instance.new("TextLabel")
+    BtnTitle.Size = UDim2.new(1, -40, 1, 0)
+    BtnTitle.Position = UDim2.new(0, 10, 0, 0)
+    BtnTitle.BackgroundTransparency = 1
+    BtnTitle.Text = text
+    BtnTitle.TextColor3 = Theme.Text
+    BtnTitle.Font = Enum.Font.GothamSemibold
+    BtnTitle.TextSize = 14
+    BtnTitle.TextXAlignment = Enum.TextXAlignment.Left
+    BtnTitle.Parent = btn
+    
+    local Status = Instance.new("Frame")
+    Status.Size = UDim2.new(0, 10, 0, 10)
+    Status.Position = UDim2.new(1, -25, 0.5, -5)
+    Status.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+    Status.BorderSizePixel = 0
+    Status.Parent = btn
+    
+    local StatusCorner = Instance.new("UICorner")
+    StatusCorner.CornerRadius = UDim.new(1, 0)
+    StatusCorner.Parent = Status
+
     local enabled = false
     btn.MouseButton1Click:Connect(function()
         enabled = not enabled
-        if enabled then
-            btn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-        else
-            btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-        end
         callback(enabled)
+        
+        if enabled then
+            TweenService:Create(Status, TweenInfo.new(0.2), {BackgroundColor3 = Theme.On}):Play()
+            TweenService:Create(BtnTitle, TweenInfo.new(0.2), {TextColor3 = Theme.Accent}):Play()
+            TweenService:Create(MainStroke, TweenInfo.new(0.5), {Color = Theme.On}):Play()
+        else
+            TweenService:Create(Status, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80, 80, 80)}):Play()
+            TweenService:Create(BtnTitle, TweenInfo.new(0.2), {TextColor3 = Theme.Text}):Play()
+            TweenService:Create(MainStroke, TweenInfo.new(0.5), {Color = Theme.Accent}):Play()
+        end
     end)
 end
 
-getgenv().AutoGems = false
-CreateButton("Auto Gems", 0, function(state)
+CreateButton("Auto Gems (Fast)", function(state)
     getgenv().AutoGems = state
 end)
 
-getgenv().AutoHoops = false
-CreateButton("Auto Hoops", 1, function(state)
+CreateButton("Auto Hoops (All)", function(state)
     getgenv().AutoHoops = state
 end)
 
-getgenv().AutoRebirth = false
-CreateButton("Auto Rebirth", 2, function(state)
+CreateButton("Auto Rebirth", function(state)
     getgenv().AutoRebirth = state
 end)
 
-getgenv().SuperSpeed = false
-CreateButton("Super Speed (300)", 3, function(state)
+CreateButton("Super Speed (300)", function(state)
     getgenv().SuperSpeed = state
 end)
 
-getgenv().InfJump = false
-CreateButton("Infinite Jump", 4, function(state)
+CreateButton("Infinite Jump", function(state)
     getgenv().InfJump = state
 end)
 
@@ -113,12 +178,14 @@ task.spawn(function()
                 local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
                 local char = Player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
-                
                 if root then
                     for _, v in pairs(container:GetChildren()) do
+                        if not getgenv().AutoGems then break end
                         if v.Name == "Gem" and v:FindFirstChild("outerGem") then
-                            root.CFrame = v.outerGem.CFrame
-                            break 
+                            if v.outerGem.Transparency < 1 then
+                                root.CFrame = v.outerGem.CFrame
+                                task.wait(0.1)
+                            end
                         end
                     end
                 end
@@ -134,12 +201,14 @@ task.spawn(function()
                 local container = game.Workspace:FindFirstChild("Hoops") or game.Workspace
                 local char = Player.Character
                 local root = char and char:FindFirstChild("HumanoidRootPart")
-                
                 if root then
                     for _, v in pairs(container:GetChildren()) do
+                        if not getgenv().AutoHoops then break end
                         if string.find(v.Name, "Hoop") then
-                            root.CFrame = v.CFrame
-                            break 
+                             if v.Transparency < 1 then
+                                root.CFrame = v.CFrame
+                                task.wait() 
+                            end
                         end
                     end
                 end
